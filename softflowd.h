@@ -99,6 +99,7 @@ struct FLOWTRACK {
 
 	/* Stuff related to flow export */
 	struct timeval system_boot_time;	/* SysUptime */
+	int system_boot_time_set;		/* Set with system_boot_time */
 	int track_level;			/* See TRACK_* above */
 
 	/* Flow timeouts */

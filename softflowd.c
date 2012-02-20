@@ -1127,6 +1127,15 @@ flow_cb(u_char *user_data, const struct pcap_pkthdr* phdr,
 	struct CB_CTXT *cb_ctxt = (struct CB_CTXT *)user_data;
 	struct timeval tv;
 
+	/*
+	 * If we don't have a system boot time already, then figure it
+	 * from the reception of the first packet.
+	 */
+	if (!cb_ctxt->ft->system_boot_time_set) {
+		cb_ctxt->ft->system_boot_time.tv_sec = phdr->ts.tv_sec;
+		cb_ctxt->ft->system_boot_time.tv_usec = phdr->ts.tv_usec;
+		cb_ctxt->ft->system_boot_time_set = 1;
+	}
 	if (cb_ctxt->ft->option.sample &&
 	    (cb_ctxt->ft->total_packets +
 	     cb_ctxt->ft->non_sampled_packets) %
@@ -1887,7 +1896,10 @@ main(int argc, char **argv)
 	}
 
 	/* Main processing loop */
-	gettimeofday(&flowtrack.system_boot_time, NULL);
+	if (capfile == NULL) {
+		gettimeofday(&flowtrack.system_boot_time, NULL);
+		flowtrack.system_boot_time_set = 1;
+	}
 	stop_collection_flag = 0;
 	memset(&cb_ctxt, '\0', sizeof(cb_ctxt));
 	cb_ctxt.ft = &flowtrack;
